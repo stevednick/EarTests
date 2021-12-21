@@ -5,12 +5,16 @@ var states = new stateMachine();
 const noteDelay = 500;
 const resetDelay = 1500;
 
+var audio = {};
+for (i=1; i<25; i++){
+        audio[i] = new Audio();
+        audio[i].src = "sounds/key" + i + ".mp3"
+}
+
 function stateMachine(){
   this.waitingToStart = 0;
   this.notAnswered = 1;
   this.incorrectAnswer = 2;
-  this.waitingToReset = 3;
-  this.waitingToPlaySecondNote = 4;
 }
 
 var currentNotes = [0, 0];
@@ -34,28 +38,6 @@ $(".start-button").on('click', function(event) {
 $(".answer").on('click', function(event) {
   checkAnswer(event);
 });
-//
-// for (i=0;i<buttons.length;i++){
-//   buttons[i].addEventListener("click", function(evt){
-//     checkAnswer(evt);
-//   });
-// }
-
-let timer = setInterval(monitorTiming, 20);
-
-function monitorTiming(){
-  var currentDate = new Date();
-  if (currentState == states.waitingToPlaySecondNote){
-    if (currentDate - delayStart > noteDelay){
-      playNote(currentNotes[1]);
-      currentState = states.notAnswered;
-    }
-  } else if (currentState == states.waitingToReset){
-    if (currentDate - delayStart > resetDelay){
-      getNotes();
-    }
-  }
-}
 
 function startButtonClicked(){
   if (currentState == states.waitingToStart){
@@ -67,11 +49,13 @@ function getNotes(){
   shuffleArray(choices);
   correctAnswer = Math.floor(Math.random()*4);
   setButtonText();
-  var firstNote = Math.floor(Math.random()*11) - 3;
+  var firstNote = Math.floor(Math.random()*9) + 1;
   currentNotes = [firstNote, firstNote + choices[correctAnswer]];
   playNote(currentNotes[0]);
-  delayStart = new Date();
-  currentState = states.waitingToPlaySecondNote;
+  setTimeout(function(){
+    playNote(currentNotes[1]);
+    currentState = states.notAnswered;
+  }, noteDelay);
 }
 
 function checkAnswer(evt){
@@ -100,23 +84,16 @@ function checkAnswer(evt){
     if (currentState == states.notAnswered){
       scores["correct"] += 1;
     }
-    delayStart = new Date();
-    currentState = states.waitingToReset;
+    setTimeout(function(){
+      getNotes();
+      currentState = states.notAnswered;
+    }, resetDelay);
     evt.target.childNodes[0].textContent = "Correct!";
   } else {
     currentState = states.incorrectAnswer;
     evt.target.childNodes[0].textContent = "Try Again!";
   }
   updateScores();
-}
-
-function getPitch(note, randomOctave = true){
-  var noteToPlay = note;
-  if (randomOctave){
-    var randomOctave = Math.floor(Math.random() * 4) - 2;
-    noteToPlay += randomOctave * 12;
-  }
-  return aPitch * Math.pow(2, noteToPlay/12);
 }
 
 function setButtonText(){
@@ -126,14 +103,7 @@ function setButtonText(){
 }
 
 function playNote(note){
-  var context = new (window.AudioContext || window.webkitAudioContext)();
-  var osc = context.createOscillator(); // instantiate an oscillator
-  osc.type = 'sine'; // this is the default - also square, sawtooth, triangle
-  osc.frequency.value = getPitch(note, false);
-  osc.connect(context.destination);
- // Hz
-  osc.start(); // start the oscillator
-  osc.stop(context.currentTime + 2); // stop 2 seconds after the current time
+  audio[note].play();
 }
 
 function updateScores(){
