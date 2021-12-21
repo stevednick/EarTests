@@ -1,7 +1,3 @@
-var buttons = document.querySelectorAll(".answer");
-var startButton = document.querySelector(".start-button");
-var scoreText = document.querySelector(".score-text");
-
 var scores = {"correct": 0, "attempted": 0};
 
 var states = new stateMachine();
@@ -31,15 +27,19 @@ const aPitch = 440.0;
 
 var correctAnswer = 0;
 
-startButton.addEventListener("click", function(){
+$(".start-button").on('click', function(event) {
   startButtonClicked();
 });
 
-for (i=0;i<buttons.length;i++){
-  buttons[i].addEventListener("click", function(evt){
-    checkAnswer(evt);
-  });
-}
+$(".answer").on('click', function(event) {
+  checkAnswer(event);
+});
+//
+// for (i=0;i<buttons.length;i++){
+//   buttons[i].addEventListener("click", function(evt){
+//     checkAnswer(evt);
+//   });
+// }
 
 let timer = setInterval(monitorTiming, 20);
 
@@ -79,14 +79,14 @@ function checkAnswer(evt){
     return;
   }
   var answerChosen = 0;
-  switch (evt.path[0].className[7]) {
-    case 'b':
+  switch ($(event.target).attr('class')) {
+    case 'answer b':
       answerChosen = 1;
       break;
-    case 'c':
+    case 'answer c':
       answerChosen = 2;
       break;
-    case 'd':
+    case 'answer d':
       answerChosen = 3;
       break;
     default:
@@ -120,10 +120,9 @@ function getPitch(note, randomOctave = true){
 }
 
 function setButtonText(){
-  for (i=0;i<buttons.length;i++){
-    var nameToDisplay = randomElement(intervals[choices[i]]);
-    buttons[i].childNodes[0].textContent = nameToDisplay;
-  }
+  $(".answer").each(function(index, el) {
+    $(this).children().text(randomElement(intervals[choices[index]]));
+  });
 }
 
 function playNote(note){
@@ -138,7 +137,7 @@ function playNote(note){
 }
 
 function updateScores(){
-  scoreText.textContent = "Score: " + scores["correct"] + "/" + scores["attempted"];
+  $(".score-text").text("Score: " + scores["correct"] + "/" + scores["attempted"]);
 }
 
 function randomElement(list){
