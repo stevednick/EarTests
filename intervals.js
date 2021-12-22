@@ -18,7 +18,6 @@ const resetDelay = 1500;
 
 const gameLength = 15;
 
-
 // var audio = {};
 //
 // for (i=1; i<25; i++){
@@ -97,6 +96,7 @@ function checkAnswer(evt){
   }
 
   if (correctAnswer == answerChosen){
+    evt.target.childNodes[0].textContent = "Correct!";
     if (currentState == states.notAnswered){
       scores.correct += 1;
     }
@@ -108,7 +108,7 @@ function checkAnswer(evt){
       getNotes();
       currentState = states.notAnswered;
     }, resetDelay);
-    evt.target.childNodes[0].textContent = "Correct!";
+
   } else {
     currentState = states.incorrectAnswer;
     evt.target.childNodes[0].textContent = "Try Again!";
@@ -124,6 +124,7 @@ function setButtonText(){
 
 function endGame(){
   currentState = states.gameOver;
+  updateScores();
   $(".debug").text("Game Over! You scored " + scores.correct + "/" + gameLength);
   $(".start-text").text("Play Again");
 }
