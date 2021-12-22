@@ -3,6 +3,7 @@ function stateMachine(){
   this.waitingToStart = 0;
   this.notAnswered = 1;
   this.incorrectAnswer = 2;
+  this.gameOver = 3;
 }
 
 function scores(){
@@ -15,6 +16,9 @@ var states = new stateMachine();
 const noteDelay = 500;
 const resetDelay = 1500;
 
+const gameLength = 15;
+
+
 var audio = {};
 for (i=1; i<25; i++){
         audio[i] = new Audio();
@@ -23,6 +27,7 @@ for (i=1; i<25; i++){
 
 var scores = new scores();
 var currentNotes = [0, 0];
+updateScores();
 
 var currentState = states.waitingToStart;
 var delayStart = new Date();
@@ -45,8 +50,11 @@ $(".answer").on('click', function(event) {
   checkAnswer(event);
 });
 
-
 function startButtonClicked(){
+  if (currentState == states.gameOver){
+    restart();
+    return;
+  }
   if (currentState == states.waitingToStart){
     getNotes();
   } else {
@@ -89,6 +97,10 @@ function checkAnswer(evt){
     if (currentState == states.notAnswered){
       scores.correct += 1;
     }
+    if (scores.attempted == gameLength){
+      endGame();
+      return;
+    }
     setTimeout(function(){
       getNotes();
       currentState = states.notAnswered;
@@ -105,6 +117,21 @@ function setButtonText(){
   $(".answer").each(function(index, el) {
     $(this).children().text(randomElement(intervals[choices[index]]));
   });
+}
+
+function endGame(){
+  currentState = states.gameOver;
+  $(".debug").text("Game Over! You scored " + scores.correct + "/" + gameLength);
+  $(".start-text").text("Play Again");
+}
+
+function restart(){
+  scores.attempted = 0;
+  scores.correct = 0;
+  getNotes();
+  currentState = states.waitingToStart;
+  $(".debug").text("");
+  updateScores();
 }
 
 function playNotes(){
@@ -124,7 +151,7 @@ function playNote(note){
 }
 
 function updateScores(){
-  $(".score-text").text("Score: " + scores.correct + "/" + scores.attempted);
+  $(".score-text").text("Score: " + scores.correct + "/" + gameLength);
 }
 
 function randomElement(list){
