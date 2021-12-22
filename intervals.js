@@ -19,11 +19,14 @@ const resetDelay = 1500;
 const gameLength = 15;
 
 
-var audio = {};
-for (i=1; i<25; i++){
-        audio[i] = new Audio();
-        audio[i].src = "sounds/key" + i + ".mp3"
-}
+// var audio = {};
+//
+// for (i=1; i<25; i++){
+//         audio[i] = new Audio();
+//         audio[i].src = "sounds/key" + i + ".mp3"
+// }
+
+//$("#sound1").play();
 
 var scores = new scores();
 var currentNotes = [0, 0];
@@ -144,10 +147,13 @@ function playNotes(){
 }
 
 function playNote(note){
-  //audio[note].stop();
-  audio[note].pause();
-  audio[note].currentTime = 0;
-  audio[note].play();
+  var playing = $("#sound" + note).get(0);
+  playing.pause();
+  playing.currentTime = 0;
+  playing.play();
+  // audio[note].pause();
+  // audio[note].currentTime = 0;
+  // audio[note].play();
 }
 
 function updateScores(){
