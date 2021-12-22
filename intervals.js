@@ -1,4 +1,14 @@
-var scores = {"correct": 0, "attempted": 0};
+//mvar scores = {"correct": 0, "attempted": 0};
+function stateMachine(){
+  this.waitingToStart = 0;
+  this.notAnswered = 1;
+  this.incorrectAnswer = 2;
+}
+
+function scores(){
+  this.correct = 0;
+  this.attempted = 0;
+}
 
 var states = new stateMachine();
 
@@ -11,12 +21,7 @@ for (i=1; i<25; i++){
         audio[i].src = "sounds/key" + i + ".mp3"
 }
 
-function stateMachine(){
-  this.waitingToStart = 0;
-  this.notAnswered = 1;
-  this.incorrectAnswer = 2;
-}
-
+var scores = new scores();
 var currentNotes = [0, 0];
 
 var currentState = states.waitingToStart;
@@ -33,15 +38,19 @@ var correctAnswer = 0;
 
 $(".start-button").on('click', function(event) {
   startButtonClicked();
+  $(".start-text").text("Replay Notes");
 });
 
 $(".answer").on('click', function(event) {
   checkAnswer(event);
 });
 
+
 function startButtonClicked(){
   if (currentState == states.waitingToStart){
     getNotes();
+  } else {
+    playNotes();
   }
 }
 
@@ -49,13 +58,9 @@ function getNotes(){
   shuffleArray(choices);
   correctAnswer = Math.floor(Math.random()*4);
   setButtonText();
-  var firstNote = Math.floor(Math.random()*9) + 1;
+  var firstNote = Math.floor(Math.random()*13) + 1;
   currentNotes = [firstNote, firstNote + choices[correctAnswer]];
-  playNote(currentNotes[0]);
-  setTimeout(function(){
-    playNote(currentNotes[1]);
-    currentState = states.notAnswered;
-  }, noteDelay);
+  playNotes();
 }
 
 function checkAnswer(evt){
@@ -77,12 +82,12 @@ function checkAnswer(evt){
       break;
   }
   if (currentState == states.notAnswered){
-    scores["attempted"] += 1;
+    scores.attempted += 1;
   }
 
   if (correctAnswer == answerChosen){
     if (currentState == states.notAnswered){
-      scores["correct"] += 1;
+      scores.correct += 1;
     }
     setTimeout(function(){
       getNotes();
@@ -102,12 +107,24 @@ function setButtonText(){
   });
 }
 
+function playNotes(){
+  playNote(currentNotes[0]);
+  setTimeout(function(){
+    playNote(currentNotes[1]);
+    currentState = states.notAnswered;
+  }, noteDelay);
+  //debug();
+}
+
 function playNote(note){
+  //audio[note].stop();
+  audio[note].pause();
+  audio[note].currentTime = 0;
   audio[note].play();
 }
 
 function updateScores(){
-  $(".score-text").text("Score: " + scores["correct"] + "/" + scores["attempted"]);
+  $(".score-text").text("Score: " + scores.correct + "/" + scores.attempted);
 }
 
 function randomElement(list){
@@ -122,4 +139,8 @@ function shuffleArray(array) {
         array[i] = array[j];
         array[j] = temp;
     }
+}
+
+function debug(){
+  $(".debug").text(currentNotes);
 }
